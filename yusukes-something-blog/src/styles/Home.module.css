@@ -1,0 +1,63 @@
+/* src/styles/Home.module.css */
+.container {
+  /* 必要に応じてホームページ全体のコンテナスタイルをここに追加できます */
+  /* 例: padding-top: 2rem; */
+}
+
+.mainHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--color-border); /* globals.cssで定義した境界線色 */
+}
+
+.mainTitle {
+  font-size: 2.4rem; /* globals.cssのh1に合わせて調整 */
+  font-weight: var(--font-weight-black); /* globals.cssのh1に合わせて調整 */
+  color: var(--color-text-emphasis);   /* 純白 */
+  margin-top: 0; /* h1のデフォルトマージンをリセットする場合 */
+  margin-bottom: 0.8em; /* globals.cssのh1に合わせて調整 */
+  letter-spacing: 0.02em; /* globals.cssのh1に合わせて調整 */
+  line-height: 1.3; /* globals.cssのh1に合わせて調整 */
+  /* text-shadow: 0 0 10px rgba(255, 0, 0, 0.2); */ /* 例：タイトルに少し赤い影を足す場合（任意） */
+}
+
+.subTitle {
+  font-size: 1.1rem;
+  color: var(--color-text-muted); /* globals.cssで定義した補助テキスト色 */
+  font-weight: var(--font-weight-light); /* 少し細めに */
+  line-height: 1.6;
+}
+
+.sectionHeading {
+    font-size: 1.9rem; /* globals.cssのh2に合わせて調整 */
+    color: var(--color-text-emphasis); /* 純白 */
+    font-weight: var(--font-weight-bold); /* globals.cssのh2に合わせて調整 */
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-light); /* globals.cssで定義した明るめの境界線色 */
+    line-height: 1.4; /* globals.cssのh2に合わせて調整 */
+}
+
+/* 他にホームページ特有のスタイルがあればここに追加していきます */
+/* 例：
+.featuresSection {
+  padding: 2rem 0;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.featureItem {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-medium);
+  border: 1px solid var(--color-border);
+}
+*/

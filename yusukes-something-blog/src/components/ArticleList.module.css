@@ -1,0 +1,11 @@
+/* components/ArticleList.module.css */
+.list {
+    /* 必要に応じてグリッドレイアウトなどをここに */
+  }
+  
+  .noArticles {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }

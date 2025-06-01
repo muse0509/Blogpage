@@ -1,0 +1,324 @@
+/* src/styles/Admin.module.css */
+.dashboardContainer {
+    padding: 2rem 2.5rem; /* 上下左右のパディングを少し調整 */
+    max-width: 1000px; /* コンテンツの最大幅を少し広げる */
+    margin: 2rem auto; /* 上下にもマージン */
+    background-color: rgba(10, 10, 10, 0.5); /* 背景を少し透明な黒に */
+    border-radius: var(--border-radius-large);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  }
+  
+  .dashboardContainer h1 {
+    color: var(--color-text-emphasis); /* グローバルCSSの変数を使用 */
+    margin-bottom: 0.5rem;
+    font-weight: var(--font-weight-black);
+    font-size: 2.2rem; /* 少し調整 */
+    text-align: center;
+  }
+  .dashboardContainer > p { /* "ようこそ..." のメッセージ */
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .section {
+    margin-top: 2.5rem;
+    padding: 2rem; /* 各セクションの内側パディング */
+    background-color: var(--color-surface); /* セクションごとの背景色 */
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--color-border);
+  }
+  .section:first-of-type {
+      margin-top: 1.5rem; /* 最初のセクションのマージンを調整 */
+  }
+  
+  .section h2 {
+    font-size: 1.8rem; /* セクションタイトルのサイズ調整 */
+    color: var(--color-accent); /* アクセントカラーを使用 */
+    margin-top: 0; /* セクション最初のh2のマージン調整 */
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-primary); /* ダークレッドの線 */
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .articleForm {
+    /* 以前の .articleForm のスタイルは .section に移設したので、ここでは特に不要か、
+       フォーム特有の追加スタイルがあれば記述 */
+  }
+  
+  .formGroup {
+    margin-bottom: 1.5rem;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 0.6rem; /* ラベルと入力欄の間隔 */
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    font-size: 0.95rem; /* ラベルのフォントサイズ */
+  }
+  
+  /* 共通の入力フィールドスタイル */
+  .formInput,
+  .formTextarea,
+  .formSelect {
+    width: 100%;
+    padding: 0.9rem 1.1rem; /* パディング調整 */
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-family-base);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .formInput:focus,
+  .formTextarea:focus,
+  .formSelect:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent), 0.25); /* フォーカス時の影を少し太く */
+  }
+  
+  .formTextarea {
+    min-height: 250px; /* テキストエリアの高さを少し大きく */
+    line-height: 1.6;
+    resize: vertical; /* 縦方向のリサイズのみ許可 */
+  }
+  
+  .formActions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 2rem; /* ボタン群の上のマージン */
+  }
+  
+  .submitButton {
+    background-color: var(--color-accent);
+    color: var(--color-text-on-accent);
+    border: none;
+    padding: 0.8rem 1.6rem; /* パディング調整 */
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    font-size: 1.05rem; /* サイズ調整 */
+    font-weight: var(--font-weight-bold);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+  .submitButton:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+  .submitButton:active {
+    transform: translateY(0px);
+  }
+  
+  
+  .cancelButton {
+    background-color: var(--color-border); /* 背景色調整 */
+    color: var(--color-text-emphasis);
+    border: none;
+    padding: 0.8rem 1.6rem; /* submitButtonと合わせる */
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: var(--font-weight-medium);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+  .cancelButton:hover {
+    background-color: var(--color-border-light);
+    transform: translateY(-1px);
+  }
+  .cancelButton:active {
+    transform: translateY(0px);
+  }
+  
+  .message {
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem; /* パディング調整 */
+    border-radius: var(--border-radius-medium);
+    background-color: var(--color-surface);
+    color: var(--color-text-emphasis);
+    border: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .message[style*="color: red"] { /* エラーメッセージの場合 (インラインスタイルに依存) */
+    border-left: 4px solid var(--color-accent);
+    background-color: rgba(var(--color-accent), 0.1);
+    color: var(--color-text); /* エラーメッセージの文字色を通常テキスト色に */
+  }
+  
+  
+  .loading {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.1rem; /* サイズ調整 */
+    color: var(--color-text-muted);
+  }
+  
+  .articlesTable {
+    width: 100%;
+    border-collapse: separate; /* collapse から変更して角丸を効かせる */
+    border-spacing: 0; /* セル間のスペースを0に */
+    margin-top: 1rem;
+    border: 1px solid var(--color-border); /* テーブル全体に枠線 */
+    border-radius: var(--border-radius-medium); /* テーブルの角丸 */
+    overflow: hidden; /* 角丸を適用するため */
+  }
+  
+  .articlesTable th,
+  .articlesTable td {
+    border-bottom: 1px solid var(--color-border); /* 各行の下線 */
+    padding: 0.9rem 1.2rem; /* パディング調整 */
+    text-align: left;
+    vertical-align: middle;
+  }
+  .articlesTable th:last-child, /* 最後の列は右寄せなど調整する場合 */
+  .articlesTable td:last-child {
+    text-align: right;
+  }
+  .articlesTable td:last-child > button { /* 操作ボタンの右マージン調整 */
+      margin-left: 0.5rem;
+      margin-right: 0;
+  }
+  
+  
+  .articlesTable th {
+    background-color: var(--color-surface);
+    color: var(--color-text); /* ヘッダー文字色調整 */
+    font-weight: var(--font-weight-semibold); /* ヘッダーフォントウェイト */
+    font-size: 0.9rem;
+    text-transform: uppercase; /* ヘッダーを大文字に */
+    letter-spacing: 0.05em;
+  }
+  
+  .articlesTable tr:last-child td {
+      border-bottom: none; /* 最後の行の下線はなし */
+  }
+  
+  .articlesTable tr:nth-child(even) {
+    background-color: rgba(var(--color-primary), 0.05); /* 偶数行の背景を非常に薄い赤系に */
+  }
+  .articlesTable tr:hover {
+      background-color: rgba(var(--color-secondary), 0.15); /* 行ホバーで少し濃い赤系に */
+  }
+  
+  
+  .actionButton,
+  .actionButtonDelete {
+    padding: 0.5rem 0.9rem; /* ボタンのパディング調整 */
+    margin-right: 0.5rem;
+    border: 1px solid transparent; /* 初期状態の枠線は透明に */
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: var(--font-weight-medium);
+    transition: all 0.15s ease-out;
+    min-width: 60px; /* ボタンの最小幅 */
+    text-align: center;
+  }
+  
+  .actionButton {
+    background-color: var(--color-secondary);
+    color: var(--color-text-on-accent);
+  }
+  .actionButton:hover {
+    background-color: var(--color-accent);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(var(--color-accent), 0.3);
+  }
+  
+  .actionButtonDelete {
+    background-color: transparent;
+    color: var(--color-text-muted); /* 通常時は控えめな色 */
+    border-color: var(--color-border-light);
+  }
+  .actionButtonDelete:hover {
+    background-color: var(--color-accent);
+    color: var(--color-text-on-accent);
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(var(--color-accent), 0.3);
+  }
+
+  /* src/styles/Admin.module.css */
+/* ... (既存のスタイル) ... */
+
+.editorTabs {
+    display: flex;
+    margin-bottom: -1px; /* 下のボーダーと重なるように調整 */
+  }
+  
+  .editorTabButton {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-bottom: none; /* 下のボーダーは表示しない */
+    background-color: var(--color-surface); /* 非アクティブタブの背景 */
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0; /* 上部のみ角丸 */
+    margin-right: 0.25rem;
+    font-weight: var(--font-weight-medium);
+    position: relative;
+    bottom: -1px; /* コンテナのボーダーと重なるように */
+  }
+  
+  .editorTabButton.activeTab {
+    background-color: var(--color-background); /* エディタ/プレビュー背景と同じに */
+    color: var(--color-text-emphasis);
+    border-bottom: 1px solid var(--color-background); /*下の線を見えなくする*/
+    font-weight: var(--font-weight-bold);
+  }
+  .editorTabButton:hover:not(.activeTab) {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+  
+  .mdeContainer {
+    border: 1px solid var(--color-border);
+    border-radius: 0 var(--border-radius-medium) var(--border-radius-medium) var(--border-radius-medium); /* 左上の角丸はタブに合わせる */
+    /* MDEditorが自身のスタイルを持つため、コンテナのスタイルは最小限に */
+  }
+  
+  /* MDEditorのデフォルトスタイルは data-color-mode="dark" (または "light") で制御されることが多い */
+  /* 必要に応じて、さらに詳細なセレクタで上書き */
+  .mdeContainer .w-md-editor-toolbar { /* ツールバーのクラス名はライブラリのバージョンにより異なる可能性あり */
+    background-color: var(--color-surface) !important; /* !important は最終手段 */
+    border-bottom-color: var(--color-border) !important;
+  }
+  .mdeContainer .w-md-editor-toolbar li button svg {
+    fill: var(--color-text-muted) !important;
+  }
+  .mdeContainer .w-md-editor-toolbar li button:hover svg {
+    fill: var(--color-text) !important;
+  }
+  .mdeContainer .w-md-editor-text textarea, /* テキスト入力エリア */
+  .mdeContainer .wmde-markdown /* MDEditor.Markdown を使ったプレビューエリア */ {
+    background-color: var(--color-background) !important;
+    color: var(--color-text) !important;
+    font-family: var(--font-family-base) !important; /* フォントを統一 */
+    line-height: 1.7 !important; /* 行間を統一 */
+    padding: 15px !important; /* パディング */
+    min-height: 400px; /* MDEditorコンポーネントのheightプロパティと合わせる */
+    box-sizing: border-box;
+  }
+  
+  .markdownPreview { /* ReactMarkdownを直接使う場合のプレビュースタイル用コンテナ */
+    background-color: var(--color-background);
+    color: var(--color-text);
+    padding: 15px;
+    min-height: 400px; /* エディタの高さと合わせる */
+    border: 1px solid var(--color-border); /* mdeContainer とは別に枠線をつける場合 */
+    border-top: none; /* 上のタブボタンと接するので上枠線は不要 */
+    border-radius: 0 0 var(--border-radius-medium) var(--border-radius-medium);
+    line-height: 1.7;
+  }
+  .tableThumbnail {
+    max-width: 80px; /* テーブル内のサムネイル最大幅 */
+    max-height: 50px; /* テーブル内のサムネイル最大高 */
+    object-fit: cover;
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--color-border-light);
+  }

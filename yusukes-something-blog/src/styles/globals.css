@@ -1,0 +1,100 @@
+/* styles/globals.css */
+:root {
+  /* 基本の赤黒カラーパレット */
+  --color-background: #000000; /* 背景の黒 */
+  --color-surface: #1a1a1a;   /* カードやセクションの背景 (黒に近いグレー) */
+  --color-primary: #3d0000;   /* プライマリ (ダークレッド) */
+  --color-secondary: #800000; /* セカンダリ (以前の#950101より少し落ち着いた赤) */
+  --color-accent: #ff0000;    /* アクセント (ブライトレッド) */
+  --color-accent-hover: #d60000; /* アクセントホバー */
+
+  --color-text: #f0f0f0;      /* メインテキスト (オフホワイト) */
+  --color-text-emphasis: #ffffff; /* 強調テキスト (純白) */
+  --color-text-muted: #a0a0a0;  /* 補助テキスト (グレー) */
+  --color-text-on-accent: #ffffff; /* アクセントカラー上のテキスト (白) */
+
+  --color-border: #444444;   /* 境界線 (グレー) */
+  --color-border-light: #666666; /* 明るめの境界線 */
+
+  /* フォントウェイト (Zen Kaku Gothic Newに合わせて) */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500; /* Zen Kaku Gothic Newにはmediumあり */
+  --font-weight-bold: 700;
+  --font-weight-black: 900; /* Zen Kaku Gothic Newにはblackあり */
+
+  /* 角丸 */
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px; /* 少しシャープに */
+  --border-radius-large: 8px;
+
+  --font-family-base: 'Zen Kaku Gothic New', sans-serif;
+}
+
+@keyframes animatedBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient( /* 背景グラデーションを復活 */
+    135deg,
+    var(--color-background) 0%,
+    var(--color-primary) 20%, /* 赤の割合を調整 */
+    var(--color-secondary) 50%,
+    var(--color-background) 100%
+  );
+  background-size: 350% 350%; /* サイズ調整 */
+  animation: animatedBackground 25s ease infinite; /* アニメーション時間調整 */
+
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.7; /* 可読性のため行間を少し広めに */
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-emphasis);
+  font-weight: var(--font-weight-bold); /* 見出しは太めに */
+  margin-top: 1.8em; /* 見出し上のマージン調整 */
+  margin-bottom: 0.8em; /* 見出し下のマージン調整 */
+  line-height: 1.4; /* 見出しの行間 */
+}
+
+h1 { font-size: 2.4rem; font-weight: var(--font-weight-black); letter-spacing: 0.02em;} /* 最も太いウェイトで見栄えよく */
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1.5rem; }
+
+p {
+  margin-bottom: 1.5em; /* 段落下のマージン */
+}
+
+a {
+  color: var(--color-accent); /* リンクはアクセントカラー */
+  text-decoration: none;
+  font-weight: var(--font-weight-medium); /* リンクを少し太く */
+  transition: color 0.2s ease-out, text-shadow 0.2s ease-out;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+  text-shadow: 0 0 5px rgba(255,0,0,0.5); /* ホバー時に少し光彩 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* スクロールバー (任意) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb { background: var(--color-secondary); border-radius: 5px; border: 2px solid var(--color-background); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "1748778610785",
+    "title": "ｄｓ",
+    "genre": "ｄｓ",
+    "content": "ｄｓ",
+    "published": true,
+    "createdAt": "2025-06-01T11:50:10.785Z",
+    "updatedAt": "2025-06-01T11:50:10.785Z"
+  },
+  {
+    "id": "1748780022899",
+    "title": "これが初めての投稿になります！",
+    "genre": "ブロックチェーン",
+    "content": "## test\n#### test\n\nkdoaskodaksodksaodksaopdkaspdksaopdkpas",
+    "published": true,
+    "createdAt": "2025-06-01T12:13:42.899Z",
+    "updatedAt": "2025-06-01T12:13:42.899Z",
+    "thumbnailUrl": "/uploads/images/1748780022880-ChatGPT_2025年5月11日_22時35分02秒.png"
+  }
+]

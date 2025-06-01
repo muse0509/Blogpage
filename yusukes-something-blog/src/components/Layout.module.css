@@ -1,0 +1,98 @@
+/* src/components/Layout.module.css */
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    width: 100%;
+    padding: 1.2rem 2rem; /* パディング調整 */
+    background-color: rgba(0, 0, 0, 0.7); /* 半透明の黒 */
+    backdrop-filter: blur(10px); /* すりガラス効果 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* 重なり順を最前面に */
+  }
+  
+  .siteTitle {
+    font-size: 1.6rem; /* サイズ調整 */
+    font-weight: var(--font-weight-bold); /* 太めに */
+    color: var(--color-text-emphasis); /* 純白 */
+    cursor: pointer;
+    letter-spacing: 0.05em; /* 文字間隔 */
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.3); /* サイトタイトルに赤い光彩 */
+  }
+  .siteTitle:hover {
+    color: var(--color-accent);
+    text-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+  }
+  
+  .nav { /* ナビゲーションは今後実装 */
+    display: flex;
+    gap: 1.5rem;
+  }
+  .nav a {
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+  }
+  .nav a:hover {
+    color: var(--color-accent);
+  }
+  
+  .main {
+    flex: 1;
+    padding: 2.5rem; /* メインコンテンツのパディング */
+    width: 100%;
+    max-width: 960px; /* コンテンツ幅を少し広めに */
+    margin: 0 auto; /* 上下のマージンはheader/footerとのバランスで */
+  }
+  
+  .footer {
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    background-color: rgba(10, 0, 0, 0.8); /* 少し赤みがかった半透明黒 */
+    border-top: 1px solid var(--color-primary); /* 境界線にダークレッド */
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  /* src/components/Layout.module.css */
+/* ... 既存のスタイル ... */
+
+.navLink { /* 管理者ページへのリンクなど */
+    color: var(--color-text);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-small);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: var(--font-weight-medium);
+  }
+  .navLink:hover {
+    background-color: rgba(255,0,0,0.1); /* 既存のテーマに合わせて調整 */
+    color: var(--color-accent);
+  }
+  
+  .authButton {
+    background-color: var(--color-secondary); /* 既存のテーマのセカンダリカラー */
+    color: var(--color-text-on-accent);
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    transition: background-color 0.2s ease;
+    margin-left: 1rem;
+  }
+  
+  .authButton:hover {
+    background-color: var(--color-accent); /* 既存のテーマのアクセントカラー */
+  }
+  .authButton:disabled {
+    background-color: var(--color-border);
+    cursor: default;
+  }
