@@ -21,12 +21,6 @@ interface Article {
   excerpt?: string;
 }
 
-// GenreTab 型 (GenreTabsコンポーネントと合わせる)
-// interface GenreTab {
-//   id: string;
-//   name: string;
-//   slug: string;
-// }
 
 import styles from '../styles/Home.module.css';
 

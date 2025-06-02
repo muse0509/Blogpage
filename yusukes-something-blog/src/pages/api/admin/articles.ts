@@ -15,7 +15,10 @@ export interface ArticleData {
   createdAt: string;
   updatedAt: string;
   published: boolean;
-  thumbnailUrl?: string; // サムネイル画像のURL (オプショナル)
+  thumbnailUrl?: string;
+  likeCount?: number;
+  slug?: string; 
+
 }
 
 export default async function handler(
@@ -61,7 +64,7 @@ export default async function handler(
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         thumbnailUrl: thumbnailUrl || undefined,
-        likeCount: 0, // 初期のいいね数は0
+        likeCount: 0, 
       };
       let articles: ArticleData[] = [];
       try {

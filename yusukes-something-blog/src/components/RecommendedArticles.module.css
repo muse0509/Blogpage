@@ -13,8 +13,10 @@
     font-weight: var(--font-weight-bold);
   }
   
-  .articlesGrid {
+  /* RecommendedArticles.module.css や PostPage.module.css など */
+.articlesGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 1.5rem; /* カード間のスペース */
+    align-items: stretch; 
   }

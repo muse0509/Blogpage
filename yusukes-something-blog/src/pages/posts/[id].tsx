@@ -7,14 +7,10 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { v4 as uuidv4 } from 'uuid'; // uuid をインポート
+import { v4 as uuidv4 } from 'uuid';
 
-// ArticleData型をAPIルートまたは共通の型定義ファイルからインポートすることを想定
-// ここでは ../../api/admin/articles.ts からインポートする例
-import type { ArticleData as Article } from '../../api/admin/articles';
-// ArticleCard用の型もインポート
+import type { ArticleData as Article } from '../api/admin/articles';
 import ArticleCard, { ArticleForCard } from '../../components/ArticleCard';
-
 import BackToTopButton from '../../components/BackToTopButton';
 import ShareButtons from '../../components/ShareButtons';
 
@@ -22,13 +18,12 @@ import styles from '../../styles/PostPage.module.css';
 
 interface PostPageProps {
   article: Article | null;
-  relatedArticles?: ArticleForCard[]; // 「他の記事を読む」セクション用
+  relatedArticles?: ArticleForCard[];
   error?: string;
 }
 
-// 匿名ユーザーIDを取得または生成する関数
 const getAnonymousUserId = (): string => {
-  if (typeof window === 'undefined') return ''; // SSR時は何もしない
+  if (typeof window === 'undefined') return '';
   let userId = localStorage.getItem('anonymousUserId');
   if (!userId) {
     userId = uuidv4();
@@ -38,11 +33,10 @@ const getAnonymousUserId = (): string => {
 };
 
 export const getServerSideProps: GetServerSideProps<PostPageProps> = async (context) => {
-  const fs = require('fs/promises'); // getServerSideProps内でのみrequire
-  const path = require('path');     // getServerSideProps内でのみrequire
+  const fs = require('fs/promises');
+  const path = require('path');
   const articlesFilePath_ssr = path.join(process.cwd(), 'data', 'articles.json');
 
-  // 配列をシャッフルするヘルパー関数 (Fisher-Yates shuffle)
   const shuffle = <T,>(array: T[]): T[] => {
       const newArr = [...array];
       for (let i = newArr.length - 1; i > 0; i--) {
@@ -77,11 +71,9 @@ export const getServerSideProps: GetServerSideProps<PostPageProps> = async (cont
     }
 
     if (!currentArticle.published) {
-      // 公開されていない記事の場合 (必要に応じてプレビューロジックなどを追加)
       return { props: { article: null, relatedArticles: [], error: 'この記事は現在公開されていません。' } };
     }
 
-    // 同じジャンルの他の公開記事を取得
     const articlesInSameGenre = allArticles.filter(
       art =>
         art.id !== currentArticle.id &&
@@ -90,18 +82,18 @@ export const getServerSideProps: GetServerSideProps<PostPageProps> = async (cont
     );
 
     const shuffledRelatedArticles = shuffle(articlesInSameGenre);
-    const selectedRelatedArticles = shuffledRelatedArticles.slice(0, 3); // 最大3件表示
+    const selectedRelatedArticles = shuffledRelatedArticles.slice(0, 3);
 
     const relatedArticlesData: ArticleForCard[] = selectedRelatedArticles.map(art => ({
       id: art.id,
       title: art.title,
       genre: art.genre,
-      content: art.content, // ArticleCardで抜粋生成のため
+      content: art.content,
       updatedAt: art.updatedAt,
-      createdAt: art.createdAt, // ArticleForCardの型定義に合わせて
-      slug: art.slug || null,   // APIにslugがあれば。なければnull
-      thumbnailUrl: art.thumbnailUrl || null,
-      likeCount: art.likeCount || 0, // いいね数も渡す
+      createdAt: art.createdAt,
+      slug: art.slug || undefined,
+      thumbnailUrl: art.thumbnailUrl || undefined,
+      likeCount: art.likeCount || 0,
     }));
 
     return { props: { article: currentArticle, relatedArticles: relatedArticlesData } };
@@ -116,12 +108,16 @@ export const getServerSideProps: GetServerSideProps<PostPageProps> = async (cont
 const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) => {
   const router = useRouter();
   const [currentUrl, setCurrentUrl] = useState('');
-
-  // いいね機能用のstate
-  const [likeCount, setLikeCount] = useState(0); // 初期値は0、articleがあればuseEffectで更新
+  const [likeCount, setLikeCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [anonymousUserId, setAnonymousUserId] = useState('');
+
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [displayContent, setDisplayContent] = useState('');
+  const [originalContent, setOriginalContent] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationError, setTranslationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -130,35 +126,28 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
       setAnonymousUserId(userId);
 
       if (article) {
-        // likeCountの初期値をサーバーから取得した値で設定
         setLikeCount(article.likeCount || 0);
-        // localStorageから「この記事をこの匿名IDがいいねしたか」を読み込む
         const likedArticlesByAnon = JSON.parse(localStorage.getItem(`liked_articles_${userId}`) || '{}');
-        if (likedArticlesByAnon[article.id]) {
-          setHasLiked(true);
-        } else {
-          setHasLiked(false);
-        }
+        setHasLiked(!!likedArticlesByAnon[article.id]);
+        
+        setOriginalContent(article.content || '');
+        setDisplayContent(article.content || '');
+        setIsTranslated(false);
+        setTranslationError(null);
       }
     }
-  }, [router.asPath, article]); // articleも依存配列に追加
+  }, [router.asPath, article]);
 
-  // いいねボタンクリック時の処理
   const handleLikeClick = async () => {
-    if (!article || !anonymousUserId || isLiking) return;
-
+    if (!article || !anonymousUserId || isLiking || hasLiked) return;
     setIsLiking(true);
-
     try {
       const response = await fetch(`/api/like/${article.id}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ anonymousUserId }),
       });
       const result = await response.json();
-
       if (response.ok) {
         setLikeCount(result.likeCount);
         if (result.message === 'Like registered successfully!') {
@@ -167,7 +156,7 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
           likedArticlesByAnon[article.id] = true;
           localStorage.setItem(`liked_articles_${anonymousUserId}`, JSON.stringify(likedArticlesByAnon));
         } else if (result.message === 'Already liked.') {
-          setHasLiked(true); // UIもいいね済み状態を維持
+          setHasLiked(true);
         }
       } else {
         console.error('いいねの登録に失敗しました:', result.error);
@@ -178,6 +167,39 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
       alert('いいね処理中に通信エラーが発生しました。');
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleTranslateClick = async () => {
+    if (!article) return;
+    if (isTranslated) {
+      setDisplayContent(originalContent);
+      setIsTranslated(false);
+      setTranslationError(null);
+      return;
+    }
+    setIsTranslating(true);
+    setTranslationError(null);
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: originalContent, targetLanguage: 'en' }),
+      });
+      const result = await response.json();
+      if (response.ok && result.translatedText) {
+        setDisplayContent(result.translatedText);
+        setIsTranslated(true);
+      } else {
+        throw new Error(result.error || 'Translation failed.'); // ★エラーメッセージを英語に
+      }
+    } catch (err: any) {
+      console.error('Translation error:', err); // ★エラーメッセージを英語に
+      setTranslationError(err.message || 'An unknown error occurred during translation.'); // ★エラーメッセージを英語に
+      setDisplayContent(originalContent);
+      setIsTranslated(false);
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -202,10 +224,7 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
       </div>
     );
   }
-
   if (!article) {
-    // このケースはgetServerSidePropsでエラーとして処理されるか、notFound: trueで404になるため、
-    // 通常ここには到達しにくいですが、念のため。
     return (
       <div className={styles.pageWrapper}>
         <div className={styles.container}>
@@ -216,8 +235,7 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
     );
   }
 
-  const articleContent = article.content || '';
-  const excerpt = articleContent.substring(0, 160) + (articleContent.length > 160 ? '...' : '');
+  const excerpt = (originalContent || '').substring(0, 160) + ((originalContent || '').length > 160 ? '...' : '');
 
   return (
     <>
@@ -246,32 +264,34 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
           <div className={styles.actionsContainer}>
             <button
               onClick={handleLikeClick}
-              disabled={isLiking || !anonymousUserId}
+              disabled={hasLiked || isLiking || !anonymousUserId}
               className={`${styles.likeButton} ${hasLiked ? styles.liked : ''} ${isLiking ? styles.liking : ''}`}
               title={hasLiked ? "いいね済み" : "いいね！"}
             >
-              <svg
-                className={styles.likeIcon}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="1.3em"
-                height="1.3em"
-              >
-                <path
-                  d="M12.001 4.52853C10.0482 2.32024 6.69908 2.49708 4.70027 4.84007C2.70145 7.18305 2.8689 10.7071 4.70027 12.8113L11.9992 20.8333L19.2991 12.8113C21.1305 10.7071 21.298 7.18305 19.2991 4.84007C17.3003 2.49708 13.9512 2.32024 12.001 4.52853Z"
-                  stroke={hasLiked ? "var(--color-accent)" : "currentColor"}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill={hasLiked ? "var(--color-accent)" : "none"}
-                />
+              <svg className={styles.likeIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.3em" height="1.3em" >
+                <path d="M12.001 4.52853C10.0482 2.32024 6.69908 2.49708 4.70027 4.84007C2.70145 7.18305 2.8689 10.7071 4.70027 12.8113L11.9992 20.8333L19.2991 12.8113C21.1305 10.7071 21.298 7.18305 19.2991 4.84007C17.3003 2.49708 13.9512 2.32024 12.001 4.52853Z"
+                  stroke={hasLiked ? "var(--color-accent)" : "currentColor"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={hasLiked ? "var(--color-accent)" : "none"} />
               </svg>
               <span className={styles.likeButtonText}>
                 {isLiking ? '処理中...' : (hasLiked ? 'いいね済み' : 'いいね！')}
               </span>
             </button>
             <span className={styles.likeCount}>{likeCount} いいね</span>
+
+            {/* ▼▼▼ 翻訳ボタンのテキスト修正 ▼▼▼ */}
+            <button
+              onClick={handleTranslateClick}
+              disabled={isTranslating}
+              className={styles.translateButton}
+            >
+              {isTranslating ? 'Translating...' : (isTranslated ? 'View Original (Japanese)' : '英語に翻訳 / Translate to English')}
+            </button>
+            {/* ▲▲▲ 翻訳ボタンのテキスト修正 ▲▲▲ */}
           </div>
+          {/* ▼▼▼ 翻訳エラーメッセージのテキスト修正 ▼▼▼ */}
+          {translationError && <p className={styles.errorMessageInline}>{translationError}</p>}
+          {/* ▲▲▲ 翻訳エラーメッセージのテキスト修正 ▲▲▲ */}
+
 
           {article.thumbnailUrl && (
             <div className={styles.thumbnailContainer}>
@@ -288,12 +308,12 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
 
           <div className={styles.content}>
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]} // remarkOembed は削除済み
+              remarkPlugins={[remarkGfm]}
             >
-              {articleContent}
+              {displayContent}
             </ReactMarkdown>
           </div>
-
+          
           <section className={styles.relatedPostsSection}>
             <h2 className={styles.relatedPostsTitle}>同じジャンルの他の記事</h2>
             {relatedArticles && relatedArticles.length > 0 ? (

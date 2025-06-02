@@ -275,3 +275,47 @@
     font-weight: var(--font-weight-medium);
     padding-left: 0.25rem; /* ボタンとの間隔 */
   }
+
+  /* src/styles/PostPage.module.css */
+/* ... (既存の .actionsContainer, .likeButton, .likeCount などのスタイルはそのまま) ... */
+
+.translateButton { /* ★ 新規追加 */
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-light);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s ease-out;
+  }
+  
+  .translateButton:hover:not(:disabled) {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-emphasis);
+    border-color: var(--color-border);
+  }
+  
+  .translateButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .errorMessageInline { /* ★ 新規追加: 翻訳エラーなどインラインで表示するメッセージ用 */
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    /* display: block; 必要に応じて */
+  }
+  
+  /* 既存の .errorMessage スタイルはページ全体のエラー用として残すか、統合・調整 */
+  .error { /* ページ全体のエラー用 */
+    color: var(--color-accent);
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-medium);
+    background-color: rgba(var(--color-accent-rgb), 0.05);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+    border-radius: var(--border-radius-medium);
+  }

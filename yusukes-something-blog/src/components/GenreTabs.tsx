@@ -1,11 +1,17 @@
-// components/GenreTabs.tsx
+// src/components/GenreTabs.tsx
 import { useState } from 'react';
-import { Genre } from '../../lib/dummyData'; // 型をインポート
-import styles from './GenreTabs.module.css';
+import styles from './GenreTabs.module.css'; // CSSモジュールをインポート
+
+// ★ GenreTabインターフェースをエクスポートする
+export interface GenreTab {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface GenreTabsProps {
-  genres: Genre[];
-  onSelectGenre: (genreSlug: string) => void; // どのジャンルが選択されたか親に伝える
+  genres: GenreTab[]; // GenreTab型を使用
+  onSelectGenre: (genreSlug: string) => void;
 }
 
 const GenreTabs = ({ genres, onSelectGenre }: GenreTabsProps) => {
@@ -15,6 +21,10 @@ const GenreTabs = ({ genres, onSelectGenre }: GenreTabsProps) => {
     setActiveTab(genreSlug);
     onSelectGenre(genreSlug);
   };
+
+  if (!genres || genres.length === 0) {
+    return null; // ジャンルがない場合は何も表示しないか、適切なUIを表示
+  }
 
   return (
     <div className={styles.tabsContainer}>
