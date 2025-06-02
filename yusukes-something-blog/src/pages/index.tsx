@@ -1,70 +1,177 @@
 // src/pages/index.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
+import Link from 'next/link'; // ページネーションのリンク用にインポート
 import SearchBar from '../components/SearchBar';
-import GenreTabs from '../components/GenreTabs';
+import GenreTabs, { GenreTab } from '../components/GenreTabs'; // GenreTab 型をインポート (またはここで定義)
 import ArticleList from '../components/ArticleList';
 import RecommendedArticles from '../components/RecommendedArticles';
-// dummyArticles, dummyGenres は GenreTabs や RecommendedArticles でまだ使っているかもしれないので残しつつ、
-// Article 型はAPIから取得するデータ構造に合わせるか、共通化します。
-import { dummyGenres, recommendedArticles as initialRecommended } from '../../lib/dummyData'; // dummyArticles のインポートを削除または変更
-import type { Genre } from '../../lib/dummyData'; // Genre 型をインポート
-import type { ArticleData as Article } from '../api/admin/articles'; // APIの型定義をArticleとしてインポート
+
+// Article型 (共通ファイルからインポート推奨)
+interface Article {
+  id: string;
+  title: string;
+  genre: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  published: boolean;
+  thumbnailUrl?: string;
+  slug?: string;
+  excerpt?: string;
+}
+
+// GenreTab 型 (GenreTabsコンポーネントと合わせる)
+// interface GenreTab {
+//   id: string;
+//   name: string;
+//   slug: string;
+// }
+
 import styles from '../styles/Home.module.css';
 
-export default function Home() {
-  const [allArticles, setAllArticles] = useState<Article[]>([]); // APIから取得した全記事
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
-  const [selectedGenre, setSelectedGenre] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true); // ローディング状態
-  const [error, setError] = useState<string | null>(null); // エラーメッセージ
+const generateSlug = (name: string): string => {
+  return name.toLowerCase().replace(/\s+/g, '-');
+};
 
-  // 記事データをAPIから取得する
+const ARTICLES_PER_PAGE = 5; // 1ページあたりの記事数
+
+export default function Home() {
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+  const [selectedGenreSlug, setSelectedGenreSlug] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [displayGenres, setDisplayGenres] = useState<GenreTab[]>([
+    { id: 'all', name: 'すべて', slug: 'all' },
+  ]);
+
+  // ★ ページネーション用のstate
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
-    const fetchArticles = async () => {
+    const fetchArticlesAndSetGenres = async () => {
       setIsLoading(true);
       setError(null);
+      setCurrentPage(1); // データ再取得時は1ページ目に戻す
       try {
-        const response = await fetch('/api/admin/articles'); // GETリクエスト
+        const response = await fetch('/api/admin/articles');
         if (!response.ok) {
-          throw new Error('記事の取得に失敗しました。');
+          const errorData = await response.json().catch(() => ({ message: '記事の取得に失敗しました。' }));
+          throw new Error(errorData.message);
         }
         const data: Article[] = await response.json();
-        setAllArticles(data);
-        setFilteredArticles(data); // 初期表示は全記事
+        const publishedArticles = data.filter(article => article.published);
+        setAllArticles(publishedArticles);
+
+        if (publishedArticles.length > 0) {
+          const uniqueGenreNames = Array.from(new Set(publishedArticles.map(article => article.genre)))
+            .filter(g => g && g.trim() !== '');
+          const dynamicGenreTabs: GenreTab[] = uniqueGenreNames.map(name => ({
+            id: generateSlug(name),
+            name: name,
+            slug: generateSlug(name),
+          }));
+          setDisplayGenres([
+            { id: 'all', name: 'すべて', slug: 'all' },
+            ...dynamicGenreTabs.sort((a, b) => a.name.localeCompare(b.name, 'ja')),
+          ]);
+        } else {
+          setDisplayGenres([{ id: 'all', name: 'すべて', slug: 'all' }]);
+        }
       } catch (err: any) {
         setError(err.message);
-        console.error("Error fetching articles:", err);
+        console.error("Error fetching articles and setting genres:", err);
+        setDisplayGenres([{ id: 'all', name: 'すべて', slug: 'all' }]);
       } finally {
         setIsLoading(false);
       }
     };
+    fetchArticlesAndSetGenres();
+  }, []);
 
-    fetchArticles();
-  }, []); // 空の依存配列なので、コンポーネントのマウント時に1回だけ実行
+  // ★ フィルタリングされた記事リストと総ページ数を計算
+  const { articlesToDisplayOnPage, totalPages } = useMemo(() => {
+    let filtered = allArticles;
 
-  const handleSelectGenre = (genreSlug: string) => {
-    setSelectedGenre(genreSlug);
-    if (genreSlug === 'all') {
-      setFilteredArticles(allArticles);
-    } else {
-      const targetGenre = dummyGenres.find(g => g.slug === genreSlug); // ジャンルデータはまだダミーを使用
+    if (selectedGenreSlug !== 'all') {
+      const targetGenre = displayGenres.find(g => g.slug === selectedGenreSlug);
       if (targetGenre) {
-        setFilteredArticles(
-          allArticles.filter((article) => article.genre === targetGenre.name)
-        );
-      } else {
-        setFilteredArticles([]); // 一致するジャンルがなければ空にする
+        filtered = filtered.filter(article => article.genre === targetGenre.name);
+      } else if (selectedGenreSlug !== 'all') {
+        filtered = [];
       }
     }
+
+    if (searchQuery.trim() !== '') {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(lowerCaseQuery) ||
+        (article.content && article.content.toLowerCase().includes(lowerCaseQuery)) ||
+        article.genre.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
+
+    const calculatedTotalPages = Math.ceil(filtered.length / ARTICLES_PER_PAGE);
+    const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+    const endIndex = startIndex + ARTICLES_PER_PAGE;
+    
+    return {
+      articlesToDisplayOnPage: filtered.slice(startIndex, endIndex),
+      totalPages: calculatedTotalPages,
+    };
+  }, [allArticles, selectedGenreSlug, searchQuery, displayGenres, currentPage]);
+
+  const handleSelectGenre = (genreSlug: string) => {
+    setSelectedGenreSlug(genreSlug);
+    setCurrentPage(1); // ジャンル変更時は1ページ目に戻す
   };
 
-  // ... （ページタイトル設定などは変更なし） ...
-  const siteTitleBase = "Yusuke's SomeThing";
-  const pageTitle = selectedGenre === 'all'
-    ? `ホーム | ${siteTitleBase}`
-    : `${dummyGenres.find(g => g.slug === selectedGenre)?.name || ''}の記事一覧 | ${siteTitleBase}`;
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // 検索実行時は1ページ目に戻す
+  };
 
+  const siteTitleBase = "Yusuke's SomeThing";
+  const currentDisplayingGenreObject = displayGenres.find(g => g.slug === selectedGenreSlug);
+  const currentDisplayingGenreName = currentDisplayingGenreObject?.name || '記事';
+  const pageTitle = searchQuery
+    ? `「${searchQuery}」の検索結果 | ${siteTitleBase}`
+    : `${currentDisplayingGenreName} | ${siteTitleBase}`;
+
+  // ★ ページネーションコントロールのレンダリング
+  const renderPaginationControls = () => {
+    if (totalPages <= 1) return null; // 1ページ以下の場合は表示しない
+
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <nav className={styles.pagination}>
+        {currentPage > 1 && (
+          <button onClick={() => setCurrentPage(currentPage - 1)} className={styles.pageLink}>
+            前へ
+          </button>
+        )}
+        {pageNumbers.map(number => (
+          <button
+            key={number}
+            onClick={() => setCurrentPage(number)}
+            className={`${styles.pageLink} ${currentPage === number ? styles.activePage : ''}`}
+          >
+            {number}
+          </button>
+        ))}
+        {currentPage < totalPages && (
+          <button onClick={() => setCurrentPage(currentPage + 1)} className={styles.pageLink}>
+            次へ
+          </button>
+        )}
+      </nav>
+    );
+  };
 
   return (
     <>
@@ -79,23 +186,30 @@ export default function Home() {
           <p className={styles.subTitle}>日々の思索、学び、そして読書の記録</p>
         </header>
 
-        <SearchBar />
-
-        {/* GenreTabsに渡すジャンルは、allArticlesから動的に生成することも検討できます */}
-        <GenreTabs genres={dummyGenres} onSelectGenre={handleSelectGenre} />
+        <SearchBar onSearch={handleSearch} />
+        <GenreTabs genres={displayGenres} onSelectGenre={handleSelectGenre} />
 
         <h2 className={styles.sectionHeading}>
-          {selectedGenre === 'all'
-            ? 'すべての記事'
-            : `${dummyGenres.find(g => g.slug === selectedGenre)?.name || '記事'} の記事`}
+          {searchQuery
+            ? `「${searchQuery}」の検索結果 (${allArticles.filter(article => (article.title.toLowerCase().includes(searchQuery.toLowerCase()) || (article.content && article.content.toLowerCase().includes(searchQuery.toLowerCase())) || article.genre.toLowerCase().includes(searchQuery.toLowerCase())) && (selectedGenreSlug === 'all' || (displayGenres.find(g => g.slug === selectedGenreSlug)?.name === article.genre)) ).length}件)` // 検索結果の総件数を表示
+            : `${currentDisplayingGenreName}の記事`}
         </h2>
         
-        {isLoading && <p>記事を読み込んでいます...</p>}
-        {error && <p style={{ color: 'red' }}>エラー: {error}</p>}
-        {!isLoading && !error && <ArticleList articles={filteredArticles} />}
+        {isLoading && <p className={styles.loadingMessage}>記事を読み込んでいます...</p>}
+        {error && <p className={styles.errorMessage} style={{ color: 'red' }}>エラー: {error}</p>}
+        {!isLoading && !error && articlesToDisplayOnPage.length === 0 && searchQuery && (
+          <p className={styles.infoMessage}>「{searchQuery}」に一致する記事は見つかりませんでした。</p>
+        )}
+        {!isLoading && !error && articlesToDisplayOnPage.length === 0 && !searchQuery && (
+          <p className={styles.infoMessage}>{currentDisplayingGenreName}の記事はまだありません。</p>
+        )}
+        {!isLoading && !error && articlesToDisplayOnPage.length > 0 && (
+          <ArticleList articles={articlesToDisplayOnPage} /> // ★ 表示するのは現在のページの記事のみ
+        )}
 
-        {/* おすすめ記事もAPIから取得するか、別途ロジックが必要になります */}
-        {!isLoading && !error && <RecommendedArticles articles={initialRecommended} />}
+        {renderPaginationControls()} {/* ★ ページネーションコントロールを表示 */}
+
+        <RecommendedArticles />
       </div>
     </>
   );

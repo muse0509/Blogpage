@@ -1,78 +1,96 @@
 /* src/components/ArticleCard.module.css */
 .card {
-    background-color: var(--color-surface); /* 黒に近いグレー */
+    background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-large); /* 角丸を少し大きく */
-    padding: 2rem; /* 内側の余白を十分に */
-    margin-bottom: 2rem; /* カード間の余白 */
+    border-radius: var(--border-radius-large);
+    padding: 0; /* パディングは内部要素で調整 */
+    margin-bottom: 1.5rem; /* Gridのgapと重複しないように注意、または削除 */
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    display: block;
-    color: var(--color-text);
+    display: flex; /* Flexboxでレイアウト */
+    flex-direction: column; /* 縦積み */
+    overflow: hidden; /* Imageコンポーネントの角丸のため */
     text-decoration: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* 少し濃いめの影 */
+    color: var(--color-text);
   }
   
   .card:hover {
-    transform: translateY(-6px) scale(1.01); /* 少し浮き上がって拡大 */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(var(--color-accent-rgb, 255, 0, 0), 0.2);
     border-color: var(--color-accent);
-    box-shadow: 0 10px 30px rgba(var(--color-accent), 0.3); /* ホバー時に赤いシャドウ */
   }
   
   .imageContainer {
     position: relative;
     width: 100%;
-    height: 200px; /* 画像の高さを少し調整 */
-    margin-bottom: 1.5rem; /* 画像とテキストの間の余白 */
-    border-radius: var(--border-radius-medium); /* 画像の角丸 */
-    overflow: hidden;
-    background-color: #222;
+    padding-top: 56.25%; /* 16:9 アスペクト比 */
+    background-color: #282828; /* 画像読み込み中/ない場合の背景 */
   }
-  .image { /* next/image の className */
-    transition: transform 0.4s ease-out;
+  
+  .noImagePlaceholder { /* ★ サムネイルがない場合のスタイル */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
   }
-  .card:hover .image {
-    transform: scale(1.05); /* ホバーで画像も少しズーム */
+  .noImagePlaceholder span {
+    padding: 1rem;
+  }
+  
+  
+  .image {
+    object-fit: cover;
   }
   
   .content {
-    /* 特に変更なし */
+    padding: 1.2rem 1.5rem; /* カード内容のパディング */
+    flex-grow: 1; /* 残りの高さを埋める */
+    display: flex;
+    flex-direction: column;
   }
   
   .genre {
     display: inline-block;
-    background-color: var(--color-secondary); /* ジャンル背景は赤系 */
-    color: var(--color-text-on-accent); /* 白文字 */
-    padding: 0.3em 0.9em; /* パディング調整 */
+    background-color: var(--color-secondary);
+    color: var(--color-text-on-accent);
+    padding: 0.25em 0.8em;
     border-radius: var(--border-radius-small);
-    font-size: 0.8rem;
-    margin-bottom: 1rem; /* ジャンルとタイトルの間の余白 */
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
     font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    align-self: flex-start; /* 左上に配置 */
   }
   
   .title {
-    font-size: 1.7rem; /* タイトルサイズを少し大きく */
+    font-size: 1.3rem; /* カード内のタイトルサイズ */
     font-weight: var(--font-weight-bold);
-    margin-top: 0;
-    margin-bottom: 0.75rem;
     color: var(--color-text-emphasis);
-    line-height: 1.3;
-    transition: color 0.2s ease;
+    margin: 0 0 0.5rem 0; /* マージン調整 */
+    line-height: 1.4;
+    flex-grow: 1; /* タイトルが長くなった場合に高さを取る */
   }
   .card:hover .title {
     color: var(--color-accent);
   }
   
   .excerpt {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--color-text);
-    margin-bottom: 1.25rem;
-    line-height: 1.7; /* 本文の行間を確保 */
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    flex-grow: 2; /* 抜粋部分にスペースを多く割り当てる */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 3行までに制限 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .date {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--color-text-muted);
-    font-weight: var(--font-weight-light);
+    margin-top: auto; /* 日付をカード下部に固定 */
+    align-self: flex-start;
   }

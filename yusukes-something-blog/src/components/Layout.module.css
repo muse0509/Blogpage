@@ -96,3 +96,58 @@
     background-color: var(--color-border);
     cursor: default;
   }
+  /* src/components/Layout.module.css */
+/* ... (既存のスタイルはそのまま) ... */
+
+.footer {
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    background-color: rgba(10, 0, 0, 0.8);
+    border-top: 1px solid var(--color-primary);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .footerLinks {
+    display: flex;
+    flex-wrap: wrap; /* モバイルで折り返すように */
+    justify-content: center; /* 中央寄せ */
+    gap: 0.5rem 0.75rem; /* 縦横のgap */
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .footerLinkItem {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-flex; /* アイコンとテキストを揃えるため */
+    align-items: center;
+  }
+  .footerLinkItem:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  
+  .footerLinkSeparator {
+    color: var(--color-border-light);
+    margin: 0 0.25rem;
+  }
+  
+  .socialIcon { /* ★ Xアイコンのスタイル */
+    vertical-align: middle; /* テキストとの縦位置調整 */
+    /* margin-right: 0.3em; */ /* テキストとアイコンの間隔 (テキストも表示する場合) */
+  }
+  .socialIconText { /* ★ Xアイコンの隣にテキスト"X"を表示する場合 */
+    margin-left: 0.3em;
+  }
+  
+  
+  .copyright {
+    margin: 0;
+  }

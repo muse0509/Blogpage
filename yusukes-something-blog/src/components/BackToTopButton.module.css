@@ -1,0 +1,33 @@
+/* src/components/BackToTopButton.module.css */
+.backToTopButton {
+    position: fixed;
+    top: 20px; /* 画面右上部 */
+    right: 20px;
+    background-color: rgba(var(--color-accent-rgb, 255, 0, 0), 0.7); /* 半透明のアクセントカラー */
+    color: var(--color-text-on-accent, white);
+    border: none;
+    border-radius: 50%; /* 丸いボタン */
+    width: 48px; /* ボタンサイズ */
+    height: 48px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0.8;
+    transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+    z-index: 1000;
+  }
+  
+  .backToTopButton:hover {
+    opacity: 1;
+    background-color: var(--color-accent, red); /* ホバーで不透明に */
+    transform: scale(1.1);
+  }
+  
+  .backToTopButton svg {
+    width: 28px; /* SVGアイコンのサイズ調整 */
+    height: 28px;
+    transform: rotate(0deg); /* 上向き矢印にする */
+  }

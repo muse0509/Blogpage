@@ -1,14 +1,5 @@
 [
   {
-    "id": "1748778610785",
-    "title": "ｄｓ",
-    "genre": "ｄｓ",
-    "content": "ｄｓ",
-    "published": true,
-    "createdAt": "2025-06-01T11:50:10.785Z",
-    "updatedAt": "2025-06-01T11:50:10.785Z"
-  },
-  {
     "id": "1748780022899",
     "title": "これが初めての投稿になります！",
     "genre": "ブロックチェーン",
@@ -17,5 +8,26 @@
     "createdAt": "2025-06-01T12:13:42.899Z",
     "updatedAt": "2025-06-01T12:13:42.899Z",
     "thumbnailUrl": "/uploads/images/1748780022880-ChatGPT_2025年5月11日_22時35分02秒.png"
+  },
+  {
+    "id": "1748837663069",
+    "title": "sa",
+    "genre": "ブロックチェーン",
+    "content": "![image![スクリーンショット 2025-05-25 20.42.04](/uploads/images/1748837640554-スクリーンショット_2025-05-25_20.42.04.png)](url)\n yusuke",
+    "published": true,
+    "createdAt": "2025-06-02T04:14:23.069Z",
+    "updatedAt": "2025-06-02T04:14:23.069Z",
+    "thumbnailUrl": "/uploads/images/1748837663036-UI_NFT.png"
+  },
+  {
+    "id": "1748837755472",
+    "title": "初めまして",
+    "genre": "自己紹介",
+    "content": "\n## 菊田佑輔と申します\n![110973](/uploads/images/1748837720108-110973.jpg)",
+    "published": true,
+    "createdAt": "2025-06-02T04:15:55.472Z",
+    "updatedAt": "2025-06-02T04:16:01.246Z",
+    "thumbnailUrl": "/uploads/images/1748837755439-スクリーンショット_2025-05-24_19.33.23.png",
+    "likeCount": 1
   }
 ]

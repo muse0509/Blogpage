@@ -1,0 +1,64 @@
+/* src/styles/StaticPage.module.css */
+.staticPageContainer {
+    max-width: 800px;
+    margin: 2rem auto 4rem auto;
+    padding: 2rem;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+  
+  .pageTitle {
+    font-size: 2.2rem;
+    font-weight: var(--font-weight-black);
+    color: var(--color-text-emphasis);
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-accent);
+  }
+  
+  .pageContent {
+    line-height: 1.8;
+    font-size: 1.05rem;
+  }
+  
+  .pageContent h2 {
+    font-size: 1.6rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-emphasis);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  
+  .pageContent h3 {
+    font-size: 1.3rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-emphasis);
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .pageContent p {
+    margin-bottom: 1.2em;
+  }
+  
+  .pageContent ul,
+  .pageContent ol {
+    margin-bottom: 1.2em;
+    padding-left: 1.8em;
+  }
+  
+  .pageContent li {
+    margin-bottom: 0.5em;
+  }
+  
+  .pageContent a {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  .pageContent a:hover {
+    text-decoration: none;
+  }

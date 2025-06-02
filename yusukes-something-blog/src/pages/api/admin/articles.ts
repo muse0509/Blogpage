@@ -61,6 +61,7 @@ export default async function handler(
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         thumbnailUrl: thumbnailUrl || undefined,
+        likeCount: 0, // 初期のいいね数は0
       };
       let articles: ArticleData[] = [];
       try {

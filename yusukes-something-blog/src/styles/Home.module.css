@@ -40,24 +40,60 @@
     line-height: 1.4; /* globals.cssのh2に合わせて調整 */
 }
 
-/* 他にホームページ特有のスタイルがあればここに追加していきます */
-/* 例：
-.featuresSection {
-  padding: 2rem 0;
+/* src/styles/Home.module.css */
+/* ... (既存のスタイル) ... */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem; /* 上の要素とのマージン */
+  margin-bottom: 2rem; /* 下の要素とのマージン */
+  gap: 0.5rem; /* ボタン間のスペース */
 }
 
-.featureList {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+.pageLink {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--color-border); /* globals.css の変数 */
+  background-color: var(--color-surface); /* globals.css の変数 */
+  color: var(--color-text); /* globals.css の変数 */
+  text-decoration: none;
+  border-radius: var(--border-radius-medium); /* globals.css の変数 */
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  font-weight: var(--font-weight-medium);
 }
 
-.featureItem {
-  background-color: var(--color-surface);
-  padding: 1.5rem;
+.pageLink:hover {
+  background-color: var(--color-accent); /* globals.css の変数 */
+  color: var(--color-text-on-accent); /* globals.css の変数 */
+  border-color: var(--color-accent);
+}
+
+.pageLink.activePage {
+  background-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  cursor: default;
+}
+
+.pageLink:disabled { /* 「前へ」「次へ」ボタンが無効な場合 (CSSでスタイル定義する場合) */
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loadingMessage,
+.errorMessage,
+.infoMessage { /* 共通のメッセージスタイル */
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+.errorMessage {
+  color: var(--color-accent); /* エラーメッセージは赤く */
+  background-color: rgba(var(--color-accent-rgb), 0.1);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.2);
   border-radius: var(--border-radius-medium);
-  border: 1px solid var(--color-border);
 }
-*/

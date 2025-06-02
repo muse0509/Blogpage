@@ -1,19 +1,20 @@
-/* components/RecommendedArticles.module.css */
+/* src/components/RecommendedArticles.module.css */
 .recommendedSection {
     margin-top: 3rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--color-primary);
+    border-top: 1px solid var(--color-border-light);
   }
   
   .sectionTitle {
     font-size: 1.8rem;
-    color: var(--color-accent);
+    color: var(--color-text-emphasis);
     margin-bottom: 1.5rem;
     text-align: center;
+    font-weight: var(--font-weight-bold);
   }
   
   .articlesGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* レスポンシブなグリッド */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
   }

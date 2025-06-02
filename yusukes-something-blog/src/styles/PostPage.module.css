@@ -1,0 +1,277 @@
+/* src/styles/PostPage.module.css */
+.pageWrapper {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .articleHeader { /* ★ 新規追加 */
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-size: 2.8rem;
+    font-weight: var(--font-weight-black);
+    color: var(--color-text-emphasis);
+    margin-top: 1rem; /* BackToListLinkとの間隔 */
+    margin-bottom: 0.75rem;
+    line-height: 1.25;
+  }
+  
+  .meta {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem; /* ShareButtonsとの間隔 */
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    /* border-bottom は ShareButtons の下に移すか、ここで維持 */
+  }
+  
+  /* ShareButtons のコンテナ (.shareContainer) のスタイルは ShareButtons.module.css で定義 */
+  /* PostPage.module.css の .shareContainer は削除または調整 */
+  
+  .thumbnailContainer {
+    margin-bottom: 2.5rem;
+    width: 100%;
+  }
+  
+  .content {
+    line-height: 1.85;
+    font-size: 1.125rem;
+    color: var(--color-text);
+  }
+  
+  /* --- ▼ ReactMarkdown要素のスタイル (変更なし、前回のものをそのまま使用) ▼ --- */
+  .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+    color: var(--color-text-emphasis);
+    font-weight: var(--font-weight-bold);
+    margin-top: 2.8em;
+    margin-bottom: 1em;
+    line-height: 1.3;
+  }
+  .content h2 {
+    font-size: 1.9rem;
+    padding-bottom: 0.4em;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .content h3 { font-size: 1.6rem; }
+  .content h4 { font-size: 1.3rem; }
+  .content p { margin-bottom: 1.5em; }
+  .content a {
+    color: var(--color-accent);
+    text-decoration: none;
+    position: relative;
+  }
+  .content a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-accent-hover);
+    transition: width 0.3s ease-out;
+  }
+  .content a:hover::after { width: 100%; }
+  .content ul, .content ol { margin-bottom: 1.5em; padding-left: 1.5em; /* 少しインデント調整 */ }
+  .content li { margin-bottom: 0.6em; }
+  .content ul li::marker { color: var(--color-accent); }
+  .content blockquote {
+    border-left: 5px solid var(--color-accent);
+    padding: 0.8em 1.2em;
+    margin: 2em 0;
+    color: var(--color-text-muted);
+    background-color: rgba(var(--color-accent-rgb, 255, 0, 0), 0.05);
+    border-radius: var(--border-radius-small);
+  }
+  .content blockquote p:last-child { margin-bottom: 0; }
+  .content pre {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1.2em 1.5em;
+    border-radius: var(--border-radius-medium);
+    overflow-x: auto;
+    margin: 2em 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid var(--color-border);
+    line-height: 1.6;
+  }
+  .content code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    background-color: rgba(var(--color-accent-rgb, 255, 0, 0), 0.15);
+    color: var(--color-accent);
+    padding: 0.25em 0.5em;
+    border-radius: var(--border-radius-small);
+    font-size: 0.9em;
+  }
+  .content pre code { background-color: transparent; color: inherit; padding: 0; font-size: inherit; line-height: 1.5; }
+  .content img { max-width: 100%; height: auto; margin: 2em auto; display: block; border-radius: var(--border-radius-medium); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+  .content hr { border: 0; height: 1px; background-color: var(--color-border); margin: 3em 0; }
+  /* --- ▲ ReactMarkdown要素のスタイル ▲ --- */
+  
+  
+  .relatedPostsSection {
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .relatedPostsTitle {
+    font-size: 1.7rem;
+    color: var(--color-text-emphasis);
+    margin-bottom: 1.8rem;
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .relatedPostsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  /* ▼▼▼ 新しい「ブログ一覧へ戻る」リンクのスタイル ▼▼▼ */
+  .backToListWrapper { /* リンクのコンテナ */
+    margin-bottom: 1.5rem; /* 他の要素との間隔 */
+    /* text-align: center; や text-align: left; など配置に応じて */
+  }
+  .backToListWrapper:first-child { /* 記事上部の戻るリンク */
+      margin-bottom: 1rem; /* タイトルとの間隔を少し狭める */
+  }
+  .backToListWrapper:last-of-type { /* 記事下部の戻るリンク */
+      margin-top: 2.5rem; /* 「他の記事」セクションとの間隔 */
+      text-align: center;
+  }
+  
+  
+  .backToListStyledLink {
+    display: inline-flex; /* アイコンとテキストを横並びにするため */
+    align-items: center;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    font-size: 0.95rem;
+    padding: 0.4rem 0.8rem; /* 適度なパディング */
+    border-radius: var(--border-radius-small);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .backToListStyledLink:hover {
+    color: var(--color-accent);
+    background-color: rgba(var(--color-accent-rgb), 0.1); /* ホバー時に薄い背景色 */
+  }
+  .backToListStyledLink svg {
+    transition: transform 0.2s ease-out; /* アイコンのトランジション */
+  }
+  .backToListStyledLink:hover svg {
+    transform: translateX(-3px); /* ホバー時にアイコンを少し左に動かす */
+  }
+  /* ▲▲▲ 新しい「ブログ一覧へ戻る」リンクのスタイル ▲▲▲ */
+  
+  
+  /* 以前の .backToListContainer と .backToListLink のスタイルは削除 */
+  
+  .error {
+    color: var(--color-accent);
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-medium);
+    background-color: rgba(var(--color-accent-rgb), 0.05);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+    border-radius: var(--border-radius-medium);
+  }
+
+  /* src/styles/PostPage.module.css */
+/* ... (既存の .actionsContainer スタイルはそのままか微調整) ... */
+.actionsContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0 2.5rem; /* サムネイルや本文との間隔を調整 */
+    padding-bottom: 1.5rem;
+    /* border-bottom: 1px dashed var(--color-border-light); */ /* 区切り線はお好みで */
+  }
+  
+  .likeButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em; /* アイコンとテキストの間隔 */
+    background-color: transparent; /* 背景を透明に */
+    color: var(--color-text-muted); /* 通常時の文字色を少し抑えめに */
+    border: 1px solid var(--color-border-light);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius-medium);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s ease-out;
+    overflow: hidden; /* アニメーション用 */
+    position: relative; /* アニメーション用 */
+  }
+  
+  .likeIcon { /* SVGアイコンの基本スタイル */
+    transition: fill 0.2s ease-out, stroke 0.2s ease-out, transform 0.2s ease-out;
+  }
+  
+  .likeButtonText {
+    line-height: 1;
+  }
+  
+  .likeButton:hover:not(:disabled):not(.liked) { /* いいね前、無効でない、ホバー時 */
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background-color: rgba(var(--color-accent-rgb), 0.05); /* 薄いアクセント背景 */
+  }
+  .likeButton:hover:not(:disabled):not(.liked) .likeIcon {
+    transform: scale(1.1); /* アイコンを少し大きく */
+  }
+  
+  
+  .likeButton.liked { /* いいね済みのスタイル */
+    color: var(--color-accent); /* いいね済みの文字色 */
+    border-color: var(--color-accent);
+    background-color: rgba(var(--color-accent-rgb), 0.1); /* 薄いアクセント背景 */
+  }
+  .likeButton.liked .likeIcon {
+    /* fill: var(--color-accent); (JSX側で制御) */
+    /* stroke: var(--color-accent); (JSX側で制御) */
+  }
+  .likeButton.liked:hover:not(:disabled) {
+      background-color: rgba(var(--color-accent-rgb), 0.15); /* ホバーで少し濃く */
+  }
+  
+  
+  .likeButton.liking, /* 通信中のスタイル */
+  .likeButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-surface); /* 無効時は少し暗めの背景 */
+  }
+  .likeButton.liking .likeButtonText::after { /* ローディングアニメーションの例 */
+    content: '...';
+    display: inline-block;
+    animation: ellipsis 1.5s infinite;
+  }
+  
+  @keyframes ellipsis {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+  
+  
+  .likeCount {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    padding-left: 0.25rem; /* ボタンとの間隔 */
+  }
