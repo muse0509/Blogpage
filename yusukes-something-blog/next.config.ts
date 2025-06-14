@@ -12,23 +12,25 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      // 他のドメイン設定など
+      // ▼▼▼ このオブジェクトがあなたのSupabase Storageを許可します ▼▼▼
+      {
+        protocol: 'https',
+        hostname: 'ntflzhcnpdugnpfvlokd.supabase.co', // ★ あなたのホスト名をここに設定
+        port: '',
+        pathname: '/storage/v1/object/public/**', // バケット内のすべての公開オブジェクトを許可
+      },
+      // ▲▲▲ このオブジェクトがあなたのSupabase Storageを許可します ▲▲▲
     ],
   },
 
-  // ★★★ 問題のあるパッケージをトランスパイル対象に追加 ★★★
   transpilePackages: [
     '@uiw/react-md-editor',
     '@uiw/react-markdown-preview',
-    // もしエラーメッセージに他の @uiw/* や関連ライブラリの名前が出てくるようであれば、
-    // それらもここに追加する必要があるかもしれません。
-    // 例えば、@uiw/react-markdown-preview が依存している @uiw/react-code-preview なども
-    // 問題を起こす可能性がありますが、まずは上記2つで試します。
   ],
 
   webpack: (
     config: WebpackConfiguration,
-    { isServer, webpack } // 'webpack' インスタンスは必要に応じて型付け
+    { isServer }
   ): WebpackConfiguration => {
     if (!isServer) {
       config.resolve = config.resolve || {};
@@ -38,7 +40,7 @@ const nextConfig: NextConfig = {
         net: false,
         tls: false,
         fs: false,
-        http2: false, // 前回のログに合わせて追加済み
+        http2: false,
         child_process: false,
       };
     }
@@ -46,4 +48,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig; // ★ CommonJS形式からES Modules形式のエクスポートに変更
+export default nextConfig;
