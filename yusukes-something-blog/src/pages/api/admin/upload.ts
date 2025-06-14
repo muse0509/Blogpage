@@ -4,7 +4,7 @@ import formidable from 'formidable';
 import fs from 'fs/promises';
 import { unstable_getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
-import { supabaseAdmin } from '../../../lib/supabaseClient'; // ★ Supabaseクライアントをインポート
+import { supabaseAdmin } from '../../../lib/supabaseClient';
 
 export const config = {
   api: {
@@ -26,7 +26,17 @@ export default async function handler(
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const form = formidable({});
+  const tempUploadDir = '/tmp'; 
+  try {
+    await fs.mkdir(tempUploadDir, { recursive: true });
+  } catch (error) {
+    console.warn('Could not create /tmp dir, it might already exist.');
+  }
+
+  const form = formidable({
+    uploadDir: tempUploadDir,
+    keepExtensions: true,
+  });
 
   try {
     const [fields, files] = await form.parse(req);
@@ -36,21 +46,20 @@ export default async function handler(
       return res.status(400).json({ error: 'No file uploaded.' });
     }
 
-    // --- ▼▼▼ ここからSupabaseへのアップロード処理 ▼▼▼ ---
-    
-    // 1. アップロードされた一時ファイルを読み込む
     const fileContent = await fs.readFile(uploadedFile.filepath);
 
-    // 2. Supabase Storageにアップロードするためのファイル名とパスを定義
-    // (例: 'public/timestamp-originalfilename.png')
-    // Supabaseのバケット内では、フォルダ構造を自由に作れます
-    const fileName = `${Date.now()}-${uploadedFile.originalFilename?.replace(/\s+/g, '_') || 'untitled'}`;
-    const filePath = `public/${fileName}`; // バケット内のパス
+    // ▼▼▼ ここが重要なファイル名のサニタイズ処理 ▼▼▼
+    const originalFilename = uploadedFile.originalFilename || 'untitled';
+    // 英数字、アンダースコア(_)、ハイフン(-)、ドット(.) 以外を全てアンダースコアに置換
+    const safeFilename = originalFilename.replace(/[^a-z0-9_.-]/gi, '_');
+    const fileNameInBucket = `${Date.now()}-${safeFilename}`;
+    // ▲▲▲ ▲▲▲
 
-    // 3. Supabase Storageにファイルをアップロード
+    const filePathInBucket = `public/${fileNameInBucket}`; // バケット内に 'public' フォルダを作って整理
+
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from('article-images') // ★ 作成したバケット名
-      .upload(filePath, fileContent, {
+      .from('article-images')
+      .upload(filePathInBucket, fileContent, {
         cacheControl: '3600',
         upsert: false,
         contentType: uploadedFile.mimetype || 'application/octet-stream',
@@ -61,25 +70,21 @@ export default async function handler(
       throw uploadError;
     }
 
-    // 4. アップロードされたファイルの公開URLを取得
     const { data: publicUrlData } = supabaseAdmin.storage
-      .from('article-images') // ★ 作成したバケット名
-      .getPublicUrl(filePath);
+      .from('article-images')
+      .getPublicUrl(filePathInBucket);
 
     if (!publicUrlData) {
       throw new Error('Could not get public URL for uploaded file.');
     }
     
-    // --- ▲▲▲ ここまでSupabaseへのアップロード処理 ▲▲▲ ---
-
-    // 一時ファイルを削除 (任意)
     await fs.unlink(uploadedFile.filepath);
 
     console.log(`File uploaded successfully to Supabase: ${publicUrlData.publicUrl}`);
     return res.status(200).json({
       message: 'File uploaded successfully!',
-      url: publicUrlData.publicUrl, // ★ Supabaseから取得した公開URLを返す
-      filename: fileName
+      url: publicUrlData.publicUrl,
+      filename: fileNameInBucket
     });
 
   } catch (error: any) {
