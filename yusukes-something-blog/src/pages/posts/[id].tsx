@@ -300,7 +300,7 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
               disabled={isTranslating}
               className={styles.translateButton}
             >
-              {isTranslating ? 'Translating...' : (isTranslated ? 'View Original (Japanese)' : '英語に翻訳')}
+              {isTranslating ? 'Translating...' : (isTranslated ? 'View Original (Japanese)' : 'Translate to English')}
             </button>
           </div>
           {translationError && <p className={styles.errorMessageInline}>{translationError}</p>}
