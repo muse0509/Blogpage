@@ -187,7 +187,7 @@ const Home: NextPage<HomePageProps> = ({ initialArticles, initialGenres, recomme
 
       <div className={styles.container}>
         <header className={styles.mainHeader}>
-          <h1 className={styles.mainTitle}>Yusuke's Thoughts & Readings</h1>
+          <h1 className={styles.mainTitle}>Yusuke's SomeThind</h1>
           <p className={styles.subTitle}>日々の思索、学び、そして読書の記録</p>
         </header>
 
