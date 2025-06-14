@@ -1,17 +1,6 @@
 // src/pages/api/like/[articleId].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs/promises';
-import path from 'path';
-import type { ArticleData } from '../admin/articles'; // ArticleData型をインポート
-
-const articlesFilePath = path.join(process.cwd(), 'data', 'articles.json');
-const likesLogFilePath = path.join(process.cwd(), 'data', 'article_likes_log.json'); // ★ いいねログファイル
-
-interface LikeLogEntry {
-  articleId: string;
-  anonymousUserId: string;
-  timestamp: string;
-}
+import { supabaseAdmin } from '../../../lib/supabaseClient';
 
 interface ApiResponse {
   message?: string;
@@ -20,37 +9,11 @@ interface ApiResponse {
   articleId?: string;
 }
 
-// いいねログを読み込むヘルパー関数
-async function readLikesLog(): Promise<LikeLogEntry[]> {
-  try {
-    const fileData = await fs.readFile(likesLogFilePath, 'utf-8');
-    if (fileData) {
-      return JSON.parse(fileData);
-    }
-  } catch (error: any) {
-    if (error.code !== 'ENOENT') { console.error('Error reading likes log file:', error); }
-  }
-  return [];
-}
-
-// いいねログを書き込むヘルパー関数
-async function writeLikesLog(data: LikeLogEntry[]): Promise<void> {
-  try {
-    await fs.mkdir(path.dirname(likesLogFilePath), { recursive: true }); // dataフォルダもなければ作成
-    await fs.writeFile(likesLogFilePath, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error('Error writing likes log file:', error);
-    throw new Error('Failed to write likes log data.');
-  }
-}
-
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { articleId } = req.query;
-  // ★ リクエストボディから anonymousUserId を取得
   const { anonymousUserId } = req.body;
 
   if (req.method !== 'POST') {
@@ -61,77 +24,70 @@ export default async function handler(
   if (!articleId || typeof articleId !== 'string') {
     return res.status(400).json({ error: 'Article ID is required.' });
   }
-  // ★ anonymousUserId の存在チェック
   if (!anonymousUserId || typeof anonymousUserId !== 'string') {
     return res.status(400).json({ error: 'Anonymous user ID is required.' });
   }
 
   try {
     // 1. いいねログを確認して重複チェック
-    const likesLog = await readLikesLog();
-    const alreadyLiked = likesLog.some(
-      log => log.articleId === articleId && log.anonymousUserId === anonymousUserId
-    );
+    const { data: existingLike, error: likeCheckError } = await supabaseAdmin
+      .from('article_likes')
+      .select('id')
+      .eq('article_id', articleId)
+      .eq('anonymous_user_id', anonymousUserId)
+      .maybeSingle(); // 存在しない場合はnull、複数ならエラー (ユニーク制約があるので単一のはず)
 
-    if (alreadyLiked) {
-      // 既にいいね済みの場合、現在のいいね数を取得して返す
-      let articles: ArticleData[] = [];
-      try {
-        const fileData = await fs.readFile(articlesFilePath, 'utf-8');
-        if (fileData) articles = JSON.parse(fileData);
-      } catch (e) { /* articles.json読み込みエラーはここでは致命的ではない */ }
-      const currentArticle = articles.find(art => art.id === articleId);
-      
-      return res.status(200).json({ // HTTPステータスは200 OKで良いが、メッセージで区別
+    if (likeCheckError) throw likeCheckError;
+
+    // 現在のいいね数を取得
+    const { data: currentArticle, error: articleFetchError } = await supabaseAdmin
+      .from('articles')
+      .select('like_count')
+      .eq('id', articleId)
+      .single();
+    
+    if (articleFetchError) throw articleFetchError;
+
+    if (existingLike) {
+      // 既にいいね済みの場合
+      return res.status(200).json({
         message: 'Already liked.',
         articleId: articleId,
-        likeCount: currentArticle?.likeCount || 0, // 現在のカウントを返す
+        likeCount: currentArticle?.like_count || 0,
       });
     }
 
-    // 2. articles.json から記事データを読み込み、いいね数を更新
-    let articles: ArticleData[] = [];
-    try {
-      const fileData = await fs.readFile(articlesFilePath, 'utf-8');
-      if (fileData) {
-        articles = JSON.parse(fileData);
-      }
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
-        console.error('articles.json not found for liking.');
-        return res.status(404).json({ error: 'Article data not found.' });
-      }
-      throw error;
-    }
+    // 2. いいね処理 (トランザクションで実行するのが理想だが、ここでは順次実行)
+    // まず、いいねログに新しい記録を追加
+    const { error: likeLogError } = await supabaseAdmin
+      .from('article_likes')
+      .insert({
+        article_id: articleId,
+        anonymous_user_id: anonymousUserId,
+      });
+    
+    if (likeLogError) throw likeLogError;
 
-    const articleIndex = articles.findIndex(art => art.id === articleId);
-    if (articleIndex === -1) {
-      return res.status(404).json({ error: 'Article not found.' });
-    }
+    // 次に、記事のいいね数をインクリメント
+    const newLikeCount = (currentArticle.like_count || 0) + 1;
+    const { data: updatedArticle, error: articleUpdateError } = await supabaseAdmin
+      .from('articles')
+      .update({ like_count: newLikeCount })
+      .eq('id', articleId)
+      .select('like_count')
+      .single();
 
-    articles[articleIndex].likeCount = (articles[articleIndex].likeCount || 0) + 1;
-    // articles[articleIndex].updatedAt = new Date().toISOString(); // いいねで更新日時を変えるかは任意
-
-    await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
-
-    // 3. いいねログに新しい記録を追加
-    const newLikeEntry: LikeLogEntry = {
-      articleId,
-      anonymousUserId,
-      timestamp: new Date().toISOString(),
-    };
-    likesLog.push(newLikeEntry);
-    await writeLikesLog(likesLog);
-
-    console.log(`Article ${articleId} liked by anonUser ${anonymousUserId}. New count: ${articles[articleIndex].likeCount}`);
+    if (articleUpdateError) throw articleUpdateError;
+    
+    console.log(`Article ${articleId} liked by anonUser ${anonymousUserId}. New count: ${updatedArticle.like_count}`);
     return res.status(200).json({
       message: 'Like registered successfully!',
       articleId: articleId,
-      likeCount: articles[articleIndex].likeCount,
+      likeCount: updatedArticle.like_count,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error processing like for article ${articleId} by anonUser ${anonymousUserId}:`, error);
-    return res.status(500).json({ error: 'Internal server error while processing like.' });
+    return res.status(500).json({ error: 'Internal server error while processing like: ' + error.message });
   }
 }

@@ -9,8 +9,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { ArticleData as Article } from '../api/admin/articles';
-import ArticleCard, { ArticleForCard } from '../../components/ArticleCard';
+import { supabaseAdmin } from '../../lib/supabaseClient';
+// 共通の型定義ファイルからのインポートを推奨
+import type { Article } from '../../types'; 
+import ArticleCard from '../../components/ArticleCard';
+import type { ArticleForCard } from '../../components/ArticleCard';
+
 import BackToTopButton from '../../components/BackToTopButton';
 import ShareButtons from '../../components/ShareButtons';
 
@@ -22,6 +26,7 @@ interface PostPageProps {
   error?: string;
 }
 
+// 匿名ユーザーIDを取得または生成する関数
 const getAnonymousUserId = (): string => {
   if (typeof window === 'undefined') return '';
   let userId = localStorage.getItem('anonymousUserId');
@@ -33,19 +38,6 @@ const getAnonymousUserId = (): string => {
 };
 
 export const getServerSideProps: GetServerSideProps<PostPageProps> = async (context) => {
-  const fs = require('fs/promises');
-  const path = require('path');
-  const articlesFilePath_ssr = path.join(process.cwd(), 'data', 'articles.json');
-
-  const shuffle = <T,>(array: T[]): T[] => {
-      const newArr = [...array];
-      for (let i = newArr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-      }
-      return newArr;
-  };
-
   const { params } = context;
   const articleId = params?.id as string;
 
@@ -54,17 +46,18 @@ export const getServerSideProps: GetServerSideProps<PostPageProps> = async (cont
   }
 
   try {
-    let allArticles: Article[] = [];
-    try {
-        const fileData = await fs.readFile(articlesFilePath_ssr, 'utf-8');
-        if (fileData) {
-            allArticles = JSON.parse(fileData);
-        }
-    } catch (e) {
-        console.warn("getServerSideProps: Could not read articles.json or it was empty.", e);
-    }
+    const { data: currentArticle, error: currentArticleError } = await supabaseAdmin
+      .from('articles')
+      .select('*')
+      .eq('id', articleId)
+      .single();
 
-    const currentArticle = allArticles.find(art => art.id === articleId);
+    if (currentArticleError) {
+      if (currentArticleError.code === 'PGRST116') { // データが見つからない場合のエラーコード
+        return { props: { article: null, relatedArticles: [], error: '指定された記事は見つかりませんでした。' } };
+      }
+      throw currentArticleError; // その他のDBエラー
+    }
 
     if (!currentArticle) {
       return { props: { article: null, relatedArticles: [], error: '指定された記事は見つかりませんでした。' } };
@@ -74,33 +67,59 @@ export const getServerSideProps: GetServerSideProps<PostPageProps> = async (cont
       return { props: { article: null, relatedArticles: [], error: 'この記事は現在公開されていません。' } };
     }
 
-    const articlesInSameGenre = allArticles.filter(
-      art =>
-        art.id !== currentArticle.id &&
-        art.published &&
-        art.genre === currentArticle.genre
-    );
+    const { data: relatedArticlesData, error: relatedArticlesError } = await supabaseAdmin
+      .from('articles')
+      .select('id, title, genre, content, updated_at, created_at, slug, thumbnail_url, like_count')
+      .eq('genre', currentArticle.genre)
+      .neq('id', currentArticle.id)
+      .eq('published', true)
+      .limit(10);
 
-    const shuffledRelatedArticles = shuffle(articlesInSameGenre);
+    if (relatedArticlesError) {
+      console.error('Supabase error fetching related articles:', relatedArticlesError);
+    }
+    
+    const shuffle = <T,>(array: T[]): T[] => {
+      const newArr = [...array];
+      for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+      }
+      return newArr;
+    };
+    const shuffledRelatedArticles = shuffle(relatedArticlesData || []);
     const selectedRelatedArticles = shuffledRelatedArticles.slice(0, 3);
-
-    const relatedArticlesData: ArticleForCard[] = selectedRelatedArticles.map(art => ({
+    
+    const articlesForCard: ArticleForCard[] = selectedRelatedArticles.map(art => ({
       id: art.id,
       title: art.title,
       genre: art.genre,
-      content: art.content,
-      updatedAt: art.updatedAt,
-      createdAt: art.createdAt,
-      slug: art.slug || undefined,
-      thumbnailUrl: art.thumbnailUrl || undefined,
-      likeCount: art.likeCount || 0,
+      content: art.content || '',
+      updatedAt: art.updated_at || '',
+      createdAt: art.created_at || '',
+      slug: art.slug || null, // undefinedの代わりにnullを使用
+      thumbnailUrl: art.thumbnail_url || null, // undefinedの代わりにnullを使用
+      likeCount: art.like_count || 0,
     }));
 
-    return { props: { article: currentArticle, relatedArticles: relatedArticlesData } };
+    const finalArticleProps: Article = {
+      id: currentArticle.id,
+      title: currentArticle.title,
+      genre: currentArticle.genre,
+      content: currentArticle.content,
+      published: currentArticle.published,
+      createdAt: currentArticle.created_at || '',
+      updatedAt: currentArticle.updated_at || '',
+      slug: currentArticle.slug || null, // undefinedの代わりにnullを使用
+      thumbnailUrl: currentArticle.thumbnail_url || null, // undefinedの代わりにnullを使用
+      likeCount: currentArticle.like_count || 0,
+    };
 
-  } catch (error) {
-    console.error('Error fetching article for SSR in [id].tsx:', error);
-    return { props: { article: null, relatedArticles: [], error: '記事の読み込み中にサーバー側でエラーが発生しました。' } };
+    return { props: { article: finalArticleProps, relatedArticles: articlesForCard } };
+
+  } catch (error: any) {
+    console.error('Error in getServerSideProps for [id].tsx:', error);
+    return { props: { article: null, relatedArticles: [], error: `記事の読み込み中にエラーが発生しました: ${error.message}` } };
   }
 };
 
@@ -112,7 +131,6 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [anonymousUserId, setAnonymousUserId] = useState('');
-
   const [isTranslated, setIsTranslated] = useState(false);
   const [displayContent, setDisplayContent] = useState('');
   const [originalContent, setOriginalContent] = useState('');
@@ -130,8 +148,9 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
         const likedArticlesByAnon = JSON.parse(localStorage.getItem(`liked_articles_${userId}`) || '{}');
         setHasLiked(!!likedArticlesByAnon[article.id]);
         
-        setOriginalContent(article.content || '');
-        setDisplayContent(article.content || '');
+        const content = article.content || '';
+        setOriginalContent(content);
+        setDisplayContent(content);
         setIsTranslated(false);
         setTranslationError(null);
       }
@@ -191,11 +210,11 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
         setDisplayContent(result.translatedText);
         setIsTranslated(true);
       } else {
-        throw new Error(result.error || 'Translation failed.'); // ★エラーメッセージを英語に
+        throw new Error(result.error || 'Translation failed.');
       }
     } catch (err: any) {
-      console.error('Translation error:', err); // ★エラーメッセージを英語に
-      setTranslationError(err.message || 'An unknown error occurred during translation.'); // ★エラーメッセージを英語に
+      console.error('Translation error:', err);
+      setTranslationError(err.message || 'An unknown error occurred during translation.');
       setDisplayContent(originalContent);
       setIsTranslated(false);
     } finally {
@@ -260,7 +279,6 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
             </div>
             {currentUrl && <ShareButtons title={article.title} url={currentUrl} /> }
           </div>
-
           <div className={styles.actionsContainer}>
             <button
               onClick={handleLikeClick}
@@ -277,22 +295,15 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
               </span>
             </button>
             <span className={styles.likeCount}>{likeCount} いいね</span>
-
-            {/* ▼▼▼ 翻訳ボタンのテキスト修正 ▼▼▼ */}
             <button
               onClick={handleTranslateClick}
               disabled={isTranslating}
               className={styles.translateButton}
             >
-              {isTranslating ? 'Translating...' : (isTranslated ? 'View Original (Japanese)' : '英語に翻訳 / Translate to English')}
+              {isTranslating ? 'Translating...' : (isTranslated ? 'View Original (Japanese)' : '英語に翻訳')}
             </button>
-            {/* ▲▲▲ 翻訳ボタンのテキスト修正 ▲▲▲ */}
           </div>
-          {/* ▼▼▼ 翻訳エラーメッセージのテキスト修正 ▼▼▼ */}
           {translationError && <p className={styles.errorMessageInline}>{translationError}</p>}
-          {/* ▲▲▲ 翻訳エラーメッセージのテキスト修正 ▲▲▲ */}
-
-
           {article.thumbnailUrl && (
             <div className={styles.thumbnailContainer}>
               <Image
@@ -305,7 +316,6 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
               />
             </div>
           )}
-
           <div className={styles.content}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -313,18 +323,13 @@ const PostPage: NextPage<PostPageProps> = ({ article, relatedArticles, error }) 
               {displayContent}
             </ReactMarkdown>
           </div>
-          
           <section className={styles.relatedPostsSection}>
             <h2 className={styles.relatedPostsTitle}>同じジャンルの他の記事</h2>
             {relatedArticles && relatedArticles.length > 0 ? (
               <div className={styles.relatedPostsGrid}>
-                {relatedArticles.map(relatedArt => (
-                  <ArticleCard key={relatedArt.id} article={relatedArt} />
-                ))}
+                {relatedArticles.map(relatedArt => ( <ArticleCard key={relatedArt.id} article={relatedArt} /> ))}
               </div>
-            ) : (
-              <p>同じジャンルの他の記事は現在ありません。</p>
-            )}
+            ) : ( <p>同じジャンルの他の記事は現在ありません。</p> )}
             <BackToListLinkComponent />
           </section>
         </article>
